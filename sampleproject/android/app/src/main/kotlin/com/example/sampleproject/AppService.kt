@@ -48,13 +48,12 @@ class AppService: Service() {
     {
         Thread(Runnable {
             var k=0;
-            for( k in 0.. 50)
+//            for( k in 0.. 50)
+            while(true)
             {
                 Log.v("OnCalling","" +k)
                 Thread.sleep(1000)
-
             }
         }).start()
-
     }
 }

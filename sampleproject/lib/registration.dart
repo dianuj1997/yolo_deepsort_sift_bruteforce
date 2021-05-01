@@ -24,6 +24,12 @@ import 'package:dio/dio.dart';
 final imgUrl =
     "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/txt/dummy.txt";
 var dio = Dio();
+class Username {
+  final String uname;
+
+  Username(this.uname);
+}
+
 
 class RegForm extends StatefulWidget {
   @override
@@ -35,7 +41,6 @@ class RegForm extends StatefulWidget {
 class _RegFormState extends State<RegForm> {
   final _minpad = 5.0;
   var _currentCat = 'Male';
-
   // var _cat = ['Citizen', 'Health Personal', 'Policy Maker'];
   var _cat = ['Male', 'Female'];
   final myController_username = TextEditingController();
@@ -318,6 +323,7 @@ class _RegFormState extends State<RegForm> {
                     child: RaisedButton(
                       color: Theme.of(context).primaryColorDark,
                       textColor: Theme.of(context).primaryColorLight,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                       child: Text('Register'),
                       onPressed: () async {
                         //_read();
@@ -420,7 +426,24 @@ class _RegFormState extends State<RegForm> {
                         //  debugPrint(currentdat);
 
                          //************************Response Data**************************************
+                        int dd=await _readIndicator();
+                        if (dd==0) {
                         final signup_response = await signup(myController_username.text, myController_password.text, myController_fullname.text,myController_phonenumber.text,myController_email.text,myController_age.text,_currentCat);
+                        Navigator.push(context,
+                            new MaterialPageRoute(builder: (context) {
+                              return new VerifyForm(uname:myController_username .text);
+                            }));
+                        }
+                        else
+                          {
+                            print("An account was already made on this phone");
+                            showAlertDialog(context);
+                            // Navigator.push(context,
+                            //     MaterialPageRoute(builder: (context) {
+                            //
+                            //       return LoginForm();
+                            //     }));
+                          }
                         //********************************************************************************
 
 
@@ -449,27 +472,16 @@ class _RegFormState extends State<RegForm> {
 //                             .then((Directory directory) {
 //                           print('Path of New Dir: '+directory.path);
 //                         });
-                        if (true==false) {
-                          print("signup");
-                          Navigator.push(context,
-                              MaterialPageRoute(builder: (context) {
-                                return LoginForm();
-                              }));
-                        } else {
-                          Navigator.push(context,
-                              MaterialPageRoute(builder: (context) {
-                                return VerifyForm();
-                              }));
-                         // print("signup not successfull!");
-                        }
+
 
                       },
-                      elevation: 20.0,
+                      elevation: 10.0,
                     )),
               ),
               Padding(
                   padding: EdgeInsets.only(top: _minpad, bottom: _minpad),
                   child: RaisedButton(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                     child: Text('Login'),
                     onPressed: () {
                       debugPrint("Login is pressed");
@@ -518,18 +530,19 @@ Future<bool> _getBoolValuesSF() async {
   return boolValue;
 }
 
-Future<bool> _readIndicator() async {
+Future<int> _readIndicator() async {
   String text;
-  bool indicator;
+  int indicator;
   try {
-    final Directory directory = await getApplicationDocumentsDirectory();
-    final File file = File('${directory.path}/indicator.txt');
+    String path = await ExtStorage.getExternalStoragePublicDirectory(ExtStorage.DIRECTORY_DOWNLOADS);
+    String fullPath = "$path/indicator.txt";
+    final File file = File(fullPath);
     text = await file.readAsString();
     // debugPrint("A file has been read at ${directory.path}");
-    indicator=true;
+    indicator=1;
   } catch (e) {
     debugPrint("Couldn't read file");
-    indicator=false;
+    indicator=0;
 
   }
   return indicator;
@@ -539,6 +552,44 @@ Future<String> get _localPath async {
   final directory = await getApplicationDocumentsDirectory();
 
   return directory.path;
+}
+
+
+showAlertDialog(BuildContext context) {
+  // Create button
+  Widget okButton = FlatButton(
+    child: Text("OK"),
+    onPressed: () {
+      Navigator.of(context).pop();
+    },
+  );
+
+  // Create AlertDialog
+  AlertDialog alert = AlertDialog(
+    title: Text("Alert"),
+    content: Text("Making a new account is prohibited as per terms and conditions. By clicking 'OK', you would be prompted towards Login page"),
+    actions: [
+      new FlatButton(
+        child: new Text('OK'),
+        onPressed: () {
+          //Navigator.of(context).pop();
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) {
+
+                     return LoginForm();
+                   }));
+        },
+      )
+    ],
+  );
+
+  // show the dialog
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return alert;
+    },
+  );
 }
 
 _write(String text) async {

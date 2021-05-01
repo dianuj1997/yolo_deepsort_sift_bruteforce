@@ -10,7 +10,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'main_page.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'package:ext_storage/ext_storage.dart';
+import 'dart:io';
 
+
+class Username {
+  final String uname;
+
+  Username(this.uname);
+}
 
 
 class LoginForm extends StatefulWidget {
@@ -144,22 +153,27 @@ class _LoginFormState extends State<LoginForm> {
                     minWidth: 200.0,
                     height: 50.0,
                     child: RaisedButton(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                       color: Theme.of(context).primaryColorDark,
                       textColor: Theme.of(context).primaryColorLight,
                       child: Text('Login'),
                       onPressed: () async {
-                        final String k1 = await cryptor.generateRandomKey();
-                        final String k2 = await cryptor.generateRandomKey();
+                        debugPrint("Login is pressed");
 
-                        final String encrypted1 =
-                        await cryptor.encrypt(myController1.text, k1);
-                        final String encrypted2 =
-                        await cryptor.encrypt(myController2.text, k2);
-
-                        final String F1 = encrypted1;
-                        final String F2 = encrypted2;
-                        print("F1 :" + F1.toString());
-                        print("F2 :" + F2.toString());
+                    //****************************   Encryption   **********************************************************
+                        // final String k1 = await cryptor.generateRandomKey();
+                        // final String k2 = await cryptor.generateRandomKey();
+                        //
+                        // final String encrypted1 =
+                        // await cryptor.encrypt(myController1.text, k1);
+                        // final String encrypted2 =
+                        // await cryptor.encrypt(myController2.text, k2);
+                        //
+                        // final String F1 = encrypted1;
+                        // final String F2 = encrypted2;
+                        // print("F1 :" + F1.toString());
+                        // print("F2 :" + F2.toString());
+                        //****************************   Encryption   **********************************************************
 
 //************************************************************************************************
                         final login_result = await login(myController1.text, myController2.text);
@@ -173,18 +187,15 @@ class _LoginFormState extends State<LoginForm> {
                         // final ret = await retrieving_keys();
                         // print("User key : " + ret.toString());
 
-                        if (0==0) {
+                        if (login_result.toString()=="1") {
                           Navigator.push(context,
-                              MaterialPageRoute(builder: (context) {
-                                return VerifyForm();
+                             new MaterialPageRoute(builder: (context) {
+                                return new VerifyForm(uname:myController1 .text);
                               }));
                         }
                         else {
                           print("login is not successfull");
                         }
-
-
-                        debugPrint("Login is pressed");
                         // Navigator.push(context,
                         //     MaterialPageRoute(builder: (context) {
                         //   return MainForm();
@@ -198,7 +209,8 @@ class _LoginFormState extends State<LoginForm> {
               Padding(
                   padding: EdgeInsets.only(top: _minpad, bottom: _minpad),
                   child: RaisedButton(
-                    child: Text('Signup'),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                    child: Text('Register'),
                     onPressed: () {
                       debugPrint("Signup is pressed");
                       Navigator.push(context,

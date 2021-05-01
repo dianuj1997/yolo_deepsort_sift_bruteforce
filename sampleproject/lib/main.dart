@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:sampleproject/login.dart';
+import 'package:sampleproject/main_page.dart';
 import 'dart:convert' as convert;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -56,10 +57,18 @@ class _PictureFormState extends State<PictureForm> {
 
   final _minpad = 5.0;
   final cryptor = new PlatformStringCryptor();
+  void getPermission() async {
+    print("getPermission");
+    Map<PermissionGroup, PermissionStatus> permissions =
+    await PermissionHandler().requestPermissions([PermissionGroup.storage]);
+  }
+
+
 
   /// Initialise the state
   @override
   void initState() {
+    getPermission();
     super.initState();
 
     /// We require the initializers to run after the loading screen is rendered
@@ -73,16 +82,25 @@ class _PictureFormState extends State<PictureForm> {
   }
   @protected
   Future runInitTasks() async {
+    String x=await getStringValuesSF();
+    if (x!=null)
+      {
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) {
+              return MainForm();
+            }));
+      }
+    else {
+      final String k1 = await cryptor.generateRandomKey();
+      final String k2 = await cryptor.generateRandomKey();
 
-    final String k1 = await cryptor.generateRandomKey();
-    final String k2 = await cryptor.generateRandomKey();
-
-    print("key1 :" + k1.toString());
-    print("key2 :" + k2.toString());
-    Navigator.push(context,
-        MaterialPageRoute(builder: (context) {
-          return LoginForm();
-        }));
+      print("key1 :" + k1.toString());
+      print("key2 :" + k2.toString());
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) {
+            return LoginForm();
+          }));
+    }
   }
 
   // local_store() async {}
@@ -161,6 +179,12 @@ class _PictureFormState extends State<PictureForm> {
     ),
     );
   }
+}
+getStringValuesSF() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  //Return String
+  String stringValue = prefs.getString('stringValue');
+  return stringValue;
 }
 
 

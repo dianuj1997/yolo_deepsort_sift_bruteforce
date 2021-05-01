@@ -10,12 +10,23 @@ import 'package:ext_storage/ext_storage.dart';
 import 'dart:io';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:dio/dio.dart';
+import 'dart:io';
+import 'dart:math';
 
 
+class Username {
+  final String uname;
+
+  Username(this.uname);
+}
 
 
 class VerifyForm extends StatefulWidget
 {
+  final String uname;
+
+  VerifyForm({Key key, this.uname}) : super(key: key);
   @override
   State<StatefulWidget> createState() {
     return _VerifyFormState();
@@ -27,6 +38,17 @@ class _VerifyFormState extends State<VerifyForm>
   final _minpad=5.0;
   final myController1 = TextEditingController();
 
+
+  void getPermission() async {
+    print("getPermission");
+    Map<PermissionGroup, PermissionStatus> permissions =
+    await PermissionHandler().requestPermissions([PermissionGroup.storage]);
+  }
+  @override
+  void initState() {
+    getPermission();
+    super.initState();
+  }
 
   verify(username,otp) async {
     var url = Uri.http('13.229.160.192:5000', '/verifyotp');
@@ -40,14 +62,14 @@ class _VerifyFormState extends State<VerifyForm>
         }));
     if (response.statusCode == 200) {
       var jsonResponse = convert.jsonDecode(response.body);
-      var itemCount = jsonResponse['Token'];
+      var itemCount = jsonResponse['token'];
       if (itemCount != null) {
         print('Here is the returned token: $itemCount.');
         print(jsonResponse["status"]);
-        return 0;
+        return itemCount;
       } else {
         // print('Here is the returned token: $itemCount.');
-        print('Verification successful with status: ${response.statusCode}.');
+        print('Verification successful with status: ${response.statusCode}. and ${itemCount}.');
         return 1;
       }
     } else {
@@ -96,64 +118,6 @@ class _VerifyFormState extends State<VerifyForm>
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(5.0))),
                   )),
-              // Padding(
-              //     padding: EdgeInsets.only(top:_minpad,bottom: _minpad),
-              //     child:TextField(
-              //       keyboardType: TextInputType.emailAddress,
-              //       decoration: InputDecoration(
-              //           labelText: 'Email',
-              //           hintText: 'e.g.xyz@hotmail.com',
-              //           border: OutlineInputBorder(
-              //               borderRadius: BorderRadius.circular(5.0))),
-              //     )),
-              // Padding(
-              //     padding:EdgeInsets.only(top:_minpad,bottom: _minpad),
-              //
-              //     child:Row(children: <Widget>[
-              //
-              //       Expanded(
-              //         child: Padding(
-              //             padding: EdgeInsets.only(top:_minpad,bottom: _minpad),
-              //             child:TextField(
-              //               keyboardType: TextInputType.phone,
-              //               decoration: InputDecoration(
-              //                   labelText: 'Phone Number',
-              //                   hintText: '(+Country Code)(Phone Number))',
-              //                   border: OutlineInputBorder(
-              //                       borderRadius: BorderRadius.circular(5.0))),
-              //             )),),
-              //
-              //       Container(width: _minpad*5,),
-              //       Expanded(
-              //           child:DropdownButton<String>(
-              //               hint: Text('Category'),
-              //               items:_cat.map((String value){
-              //                 return DropdownMenuItem<String>(
-              //                   value:value,
-              //                   child:Text(value),
-              //                 );
-              //               }
-              //               ).toList(),
-              //               value:_currentCat,
-              //               onChanged: (String newValueSelected)
-              //               {
-              //                 _onDroDownItemSelected(newValueSelected);
-              //               }
-              //
-              //           ))
-              //     ],)),
-              // Padding(
-              //     padding: EdgeInsets.only(top:_minpad,bottom: _minpad),
-              //     child:TextField(
-              //       keyboardType: TextInputType.name,
-              //       decoration: InputDecoration(
-              //           labelText: 'New Password',
-              //           hintText:'only characters and numbers are allowed',
-              //           border: OutlineInputBorder(
-              //               borderRadius: BorderRadius.circular(5.0)
-              //           )
-              //       ),
-              //     )),
 
               Padding(
                 padding: EdgeInsets.only(top: _minpad,bottom: _minpad),
@@ -164,14 +128,28 @@ class _VerifyFormState extends State<VerifyForm>
                     child:RaisedButton(
                       color: Theme.of(context).primaryColorDark,
                       textColor: Theme.of(context).primaryColorLight,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                       child:Text('Verify'),
                       onPressed: ()
                       async{
                         debugPrint("Verify is pressed");
                         //************************************************************************************************
-                        final login_result = await verify("Junaid11",myController1.text);
+                        final login_result = await verify(widget.uname,myController1.text);
                         print("Verification Result" + login_result.toString());
-                        _write(login_result.toString());
+                       //  String path =
+                       //  await ExtStorage.getExternalStoragePublicDirectory(
+                       //      ExtStorage.DIRECTORY_DOWNLOADS);
+                       //  String fullPath = "$path/verifier.txt";
+                       // // print('full path ${fullPath}');
+                       //  //***************************Download a file from URL**********************
+                       //  // download_from_url(dio, imgUrl, fullPath);
+                       //  //************************************************************************
+                       //  File file = File(fullPath);
+                        var random=new Random();
+                        //_write(1.toString());
+                        _writeIndicator(1.toString());
+                        writeToken(login_result.toString());
+
                         //***********************************************************************************
 
                         Navigator.push(context,MaterialPageRoute(builder: (context)
@@ -182,6 +160,17 @@ class _VerifyFormState extends State<VerifyForm>
                       },
                       elevation: 20.0,
                     )),),
+              Padding(
+                  padding: EdgeInsets.only(top: _minpad, bottom: _minpad),
+                  child: RaisedButton(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                    child: Text('Resend OTP'),
+                    onPressed: () async{
+                      debugPrint("Resend OTP is pressed");
+
+                    },
+                    elevation: 20.0,
+                  )),
               //
 
             ],
@@ -201,9 +190,42 @@ class _VerifyFormState extends State<VerifyForm>
   }
 }
 _write(String text) async {
-  final Directory directory = await getApplicationDocumentsDirectory();
-  final File file = File('${directory.path}/ref_signup_Data.txt');
+  String path = await ExtStorage.getExternalStoragePublicDirectory(ExtStorage.DIRECTORY_DOWNLOADS);
+  String fullPath = "$path/verifier.txt";
+  final File file = File(fullPath);
   await file.writeAsString(text);
+  debugPrint("*********************************************************************************************");
   debugPrint(
-      "A file with new content,i.e. ${text} has been stored at ${directory.path}");
+      "A verifier file with new content,i.e. ${text} has been stored ");
+  debugPrint("*********************************************************************************************");
+}
+_writeIndicator(String text) async {
+  try {
+    String path = await ExtStorage.getExternalStoragePublicDirectory(
+        ExtStorage.DIRECTORY_DOWNLOADS);
+    String fullPath = "$path/indicator.txt";
+    final File file = File(fullPath);
+    await file.writeAsString(text);
+    debugPrint(
+        "*********************************************************************************************");
+    debugPrint(
+        "An indicator file with new content,i.e. ${text} has been stored");
+    debugPrint(
+        "*********************************************************************************************");
+  }
+  catch (e) {
+    debugPrint(
+        "*********************************************************************************************");
+    debugPrint("Couldn't write a file");
+    debugPrint(
+        "*********************************************************************************************");
+  }
+}
+writeToken(String text) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  prefs.setString('stringValue', text);
+  debugPrint("*********************************************************************************************");
+  debugPrint(
+      "A new content,i.e. ${text} has been stored in local storage");
+  debugPrint("*********************************************************************************************");
 }

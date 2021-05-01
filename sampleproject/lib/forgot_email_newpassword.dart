@@ -77,9 +77,9 @@ class _ResetFormState extends State<ResetForm> {
           margin: EdgeInsets.all(_minpad * 2),
           child: Column(
             children: <Widget>[
-
+              getImageAsset(),
               Padding(
-                  padding: EdgeInsets.only(top: _minpad*30, bottom: _minpad * 10),
+                  padding: EdgeInsets.only(top: _minpad*3, bottom: _minpad * 10),
                   child: Text(
                     "Reset Password",
                     textDirection: TextDirection.ltr,
@@ -201,6 +201,19 @@ class _ResetFormState extends State<ResetForm> {
             ],
           )
       ),
+    );
+  }
+  Widget getImageAsset() {
+    AssetImage assetImage = AssetImage('images/reset_fig.png');
+    Image image = Image(
+      image: assetImage,
+      width: 125.0,
+      height: 125.0,
+    );
+    return Container(
+      child: image,
+      margin: EdgeInsets.only(
+          left: _minpad * 10, right: _minpad * 10, top: _minpad * 10),
     );
   }
 }

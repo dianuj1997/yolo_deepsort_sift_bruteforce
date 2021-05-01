@@ -22,9 +22,12 @@ import 'package:flutter/services.dart';
 import 'package:ext_storage/ext_storage.dart';
 import 'package:dio/dio.dart';
 import 'dart:io';
+import 'package:cron/cron.dart';
 
-final imgUrl =
-    "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
+// final imgUrl =
+//     "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
+
+final imgUrl="http://13.229.160.192:5000/downloadsensorszip/junaid2";
 
 var dio = Dio();
 
@@ -159,6 +162,7 @@ class _MainFormState extends State<MainForm>
       String data=await methodChannel.invokeMethod("startService");
       debugPrint('*******************************************************************************************');
       debugPrint(data);
+      debugPrint('*******************************************************************************************');
 
     }
   }
@@ -189,36 +193,41 @@ class _MainFormState extends State<MainForm>
                 ),
                   value: "/logout"
               ),
-              const PopupMenuItem(
-                child: ListTile(
-                  leading: Icon(Icons.not_interested_outlined),
-                  title: Text('Signout'),
-
-
-                ),
-                  value: "/signout"
-              ),
-              const PopupMenuItem(
-                child: ListTile(
-                  leading: Icon(Icons.qr_code),
-                  title: Text('QR Code'),
-                ),
-                  value: "/qrcode"
-              ),
-              const PopupMenuItem(
-                child: ListTile(
-
-                  leading: Icon(Icons.qr_code_scanner),
-                  title: Text('QR Scanner'),
-                ),
-                  value: "/qrscanner"
-              ),
+              // const PopupMenuItem(
+              //   child: ListTile(
+              //     leading: Icon(Icons.qr_code),
+              //     title: Text('QR Code'),
+              //   ),
+              //     value: "/qrcode"
+              // ),
+              // const PopupMenuItem(
+              //   child: ListTile(
+              //
+              //     leading: Icon(Icons.qr_code_scanner),
+              //     title: Text('QR Scanner'),
+              //   ),
+              //     value: "/qrscanner"
+              // ),
               const PopupMenuItem(
                 child: ListTile(
                   leading: Icon(Icons.upload_file),
-                  title: Text('Data Upload'),
+                  title: Text('Manual Data Upload'),
                 ),
                   value: "/dataupload"
+              ),
+              const PopupMenuItem(
+                  child: ListTile(
+                    leading: Icon(Icons.memory),
+                    title: Text('Automatic Data Upload'),
+                  ),
+                  value: "/backgroundservice"
+              ),
+              const PopupMenuItem(
+                  child: ListTile(
+                    leading: Icon(Icons.file_download),
+                    title: Text('Download Data'),
+                  ),
+                  value: "/downloaddata"
               ),
               const PopupMenuItem(
 
@@ -259,6 +268,52 @@ class _MainFormState extends State<MainForm>
                {
                  scanQR();
                }
+             else if(value=='/downloaddata')
+             {
+               String path =
+               await ExtStorage.getExternalStoragePublicDirectory(
+                   ExtStorage.DIRECTORY_DOWNLOADS);
+               //String fullPath = tempDir.path + "/boo2.pdf'";
+               String fullPath = "$path/data.zip";
+               print('full path ${fullPath}');
+               download_from_url(dio, imgUrl, fullPath);
+             }
+             else if(value=='/backgroundservice')
+             {
+               startService();
+               var cron = new Cron();
+               cron.schedule(new Schedule.parse('*/1 * * * *'), () async {
+                 print('******************************Start of Schedule operation*******************************');
+                 print('Occurs every three minutes');
+                 //********************************************************************
+                 try {
+                   final stopwatch = Stopwatch()
+                     ..start();
+                   final result = await InternetAddress.lookup('google.com');
+                   print('doSomething() executed in ${stopwatch.elapsed}');
+                   if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+                     _onCheckPushed('Connected: latency= ${stopwatch.elapsed
+                         .inMilliseconds} ms');
+                   }
+                 } on SocketException catch (_) {
+                   _onCheckPushed('Not Connected');
+                 }
+                 //**********************************************************************
+                 String path =
+                 await ExtStorage.getExternalStoragePublicDirectory(
+                     ExtStorage.DIRECTORY_DOWNLOADS);
+                 //String fullPath = tempDir.path + "/boo2.pdf'";
+                 String fullPath = "$path/junaid2_22-04-21.csv";
+                 print('full path ${fullPath}');
+                 //***************************Download a file from URL**********************
+                 // download_from_url(dio, imgUrl, fullPath);
+                 //************************************************************************
+                 File file = File(fullPath);
+                 print("Path of file to be uploaded:   "+fullPath);
+                 data_upload(fullPath);
+                 print('******************************End of Schedule operation*******************************');
+               });
+             }
              else if(value=='/qrcode')
                {
                  Navigator.push(context,
@@ -277,14 +332,10 @@ class _MainFormState extends State<MainForm>
                  //debugPrint('Logout is Pressed');
                  Navigator.push(context,MaterialPageRoute(builder: (context)
                  {
-
-                   return RegForm();
+                   removeToken();
+                   return LoginForm();
                  }
                  ));
-
-               }
-             else if(value=='/signout')
-               {
 
                }
              else if(value=='/dataupload')
@@ -293,7 +344,7 @@ class _MainFormState extends State<MainForm>
                  await ExtStorage.getExternalStoragePublicDirectory(
                      ExtStorage.DIRECTORY_DOWNLOADS);
                  //String fullPath = tempDir.path + "/boo2.pdf'";
-                 String fullPath = "$path/Sensor_Data.csv";
+                 String fullPath = "$path/junaid2_22-04-21.csv";
                  print('full path ${fullPath}');
 
 
@@ -362,8 +413,12 @@ class _MainFormState extends State<MainForm>
               //     )),
               //
               //***************************************************************************************************************
-              Text('Internet Connection Status : $_connection_wifi\n',
+          Padding(
+          padding: EdgeInsets.only(top: _minpad*20, bottom: _minpad*6),
+         child: Text('Internet Connection Status : $_connection_wifi\n',
                   style: TextStyle(fontSize: 20)),
+          ),
+             
 
 
 
@@ -421,5 +476,10 @@ Future<int> deleteFile() async {
   } catch (e) {
     return 0;
   }
+}
+
+removeToken() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  prefs.remove("stringValue");
 }
 

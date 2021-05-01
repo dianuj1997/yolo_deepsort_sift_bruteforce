@@ -15,11 +15,6 @@ class ForgotForm extends StatefulWidget
 {
 
 
-
-
-
-
-
   @override
   State<StatefulWidget> createState() {
     return _ForgotFormState();
@@ -35,7 +30,7 @@ class _ForgotFormState extends State<ForgotForm> {
 
 
   forgotemail(email) async {
-    var url = Uri.http('13.229.160.192:5000', '/verifycodeviaemail');
+    var url = Uri.http('13.229.160.192:5000', '/sendcode');
     var response = await http.post(url,
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
@@ -59,6 +54,25 @@ class _ForgotFormState extends State<ForgotForm> {
       return 2;
     }
   }
+  verify_verification(email,code) async {
+    var url = Uri.http('13.229.160.192:5000', '/verifycodeviaemail');
+    var response = await http.post(url,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: convert.jsonEncode(<String, String>{
+          "email": email,
+          "code": code
+        }));
+    if (response.statusCode == 200) {
+      var jsonResponse = convert.jsonDecode(response.body);
+      var itemCount = jsonResponse['Token'];
+      return 200;
+    } else {
+      print('Request failed with status: ${response.statusCode}.');
+      return 2;
+    }
+  }
 
   local_store() async {}
 
@@ -76,9 +90,9 @@ class _ForgotFormState extends State<ForgotForm> {
           margin: EdgeInsets.all(_minpad * 2),
           child: Column(
             children: <Widget>[
-
+              getImageAsset(),
               Padding(
-                  padding: EdgeInsets.only(top: _minpad*30, bottom: _minpad * 10),
+                  padding: EdgeInsets.only(top: _minpad*3, bottom: _minpad * 10),
                   child: Text(
                     "Forgot Password",
                     textDirection: TextDirection.ltr,
@@ -90,16 +104,7 @@ class _ForgotFormState extends State<ForgotForm> {
                         color: Colors.black),
                   )),
 
-              // Padding(
-              //     padding: EdgeInsets.only(top: _minpad, bottom: _minpad),
-              //     child: TextField(
-              //       keyboardType: TextInputType.name,
-              //       decoration: InputDecoration(
-              //           labelText: 'Enter Email',
-              //           hintText: 'e.g.xyz@gotmail.com',
-              //           border: OutlineInputBorder(
-              //               borderRadius: BorderRadius.circular(5.0))),
-              //     )),
+
               Padding(
                   padding: EdgeInsets.only(top: _minpad, bottom: _minpad),
                   child: Row(
@@ -136,6 +141,7 @@ class _ForgotFormState extends State<ForgotForm> {
                               textColor: Theme
                                   .of(context)
                                   .primaryColorLight,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
                               child: Text('Send Code'),
                               onPressed: () async{
                                 _onCheckPushed(true);
@@ -148,7 +154,7 @@ class _ForgotFormState extends State<ForgotForm> {
                                 // }
                                 // ));
                               },
-                              elevation: 20.0,
+                              elevation: 5.0,
                             )),),
                     ],
                   )),
@@ -164,64 +170,6 @@ class _ForgotFormState extends State<ForgotForm> {
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(5.0))),
                   )),
-              // Padding(
-              //     padding: EdgeInsets.only(top:_minpad,bottom: _minpad),
-              //     child:TextField(
-              //       keyboardType: TextInputType.emailAddress,
-              //       decoration: InputDecoration(
-              //           labelText: 'Email',
-              //           hintText: 'e.g.xyz@hotmail.com',
-              //           border: OutlineInputBorder(
-              //               borderRadius: BorderRadius.circular(5.0))),
-              //     )),
-              // Padding(
-              //     padding:EdgeInsets.only(top:_minpad,bottom: _minpad),
-              //
-              //     child:Row(children: <Widget>[
-              //
-              //       Expanded(
-              //         child: Padding(
-              //             padding: EdgeInsets.only(top:_minpad,bottom: _minpad),
-              //             child:TextField(
-              //               keyboardType: TextInputType.phone,
-              //               decoration: InputDecoration(
-              //                   labelText: 'Phone Number',
-              //                   hintText: '(+Country Code)(Phone Number))',
-              //                   border: OutlineInputBorder(
-              //                       borderRadius: BorderRadius.circular(5.0))),
-              //             )),),
-              //
-              //       Container(width: _minpad*5,),
-              //       Expanded(
-              //           child:DropdownButton<String>(
-              //               hint: Text('Category'),
-              //               items:_cat.map((String value){
-              //                 return DropdownMenuItem<String>(
-              //                   value:value,
-              //                   child:Text(value),
-              //                 );
-              //               }
-              //               ).toList(),
-              //               value:_currentCat,
-              //               onChanged: (String newValueSelected)
-              //               {
-              //                 _onDroDownItemSelected(newValueSelected);
-              //               }
-              //
-              //           ))
-              //     ],)),
-              // Padding(
-              //     padding: EdgeInsets.only(top:_minpad,bottom: _minpad),
-              //     child:TextField(
-              //       keyboardType: TextInputType.name,
-              //       decoration: InputDecoration(
-              //           labelText: 'New Password',
-              //           hintText:'only characters and numbers are allowed',
-              //           border: OutlineInputBorder(
-              //               borderRadius: BorderRadius.circular(5.0)
-              //           )
-              //       ),
-              //     )),
 
               Padding(
                 padding: EdgeInsets.only(top: _minpad, bottom: _minpad),
@@ -230,20 +178,26 @@ class _ForgotFormState extends State<ForgotForm> {
                     width: 200.0,
                     height: 50.0,
                     child: RaisedButton(
+
                       color: Theme
                           .of(context)
                           .primaryColorDark,
                       textColor: Theme
                           .of(context)
                           .primaryColorLight,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                       child: Text('Next'),
                       onPressed: () async{
                         debugPrint("Next is pressed");
-                        Navigator.push(context, new MaterialPageRoute(builder: (
-                            context) {
-                          return new ResetForm(email:myController_email.text);
+                        final verifyresult = await verify_verification(myController_email.text,myController_code.text);
+                        if (verifyresult==200) {
+                          Navigator.push(context,
+                              new MaterialPageRoute(builder: (context) {
+                                return new ResetForm(
+                                    email: myController_email.text);
+                              }
+                              ));
                         }
-                        ));
                       },
                       elevation: 20.0,
                     )),),
@@ -258,5 +212,18 @@ class _ForgotFormState extends State<ForgotForm> {
     setState(() {
       this._x = newSelected;
     });
+  }
+  Widget getImageAsset() {
+    AssetImage assetImage = AssetImage('images/forgot_fig.png');
+    Image image = Image(
+      image: assetImage,
+      width: 125.0,
+      height: 125.0,
+    );
+    return Container(
+      child: image,
+      margin: EdgeInsets.only(
+          left: _minpad * 10, right: _minpad * 10, top: _minpad * 10),
+    );
   }
 }
