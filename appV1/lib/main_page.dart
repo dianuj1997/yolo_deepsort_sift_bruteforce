@@ -402,7 +402,7 @@ class _MainFormState extends State<MainForm>
                       //************************************************************************
                       File file = File(fullPath);
                       print("Path of file to be uploaded:   "+fullPath);
-                      data_upload(fullPath);
+                      data_upload_bt(fullPath);
                       print('******************************End of Schedule operation*******************************');
                     });
                   }
@@ -478,7 +478,7 @@ class _MainFormState extends State<MainForm>
                     //************************************************************************
                     File file = File(fullPath);
                     print("Path of file to be uploaded:   "+fullPath);
-                    data_upload(fullPath);
+                    data_upload_bt(fullPath);
                     debugPrint("***********************************************************************");
                     debugPrint(widget.uname);
                     debugPrint("***********************************************************************");
