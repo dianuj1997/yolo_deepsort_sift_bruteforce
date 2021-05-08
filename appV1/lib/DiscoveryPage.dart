@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:intl/intl.dart';
 
 import './BluetoothDeviceListEntry.dart';
 import 'dart:math';
@@ -19,11 +20,19 @@ final imgUrl =
 
 var dio = Dio();
 
+class Username{
+  final String uname;
+
+  Username(this.uname);
+}
+
+
 class DiscoveryPage extends StatefulWidget {
   /// If true, discovery starts on page start, otherwise user must press action button.
+  final String uname3;
   final bool start;
 
-  const DiscoveryPage({this.start = true});
+  const DiscoveryPage({Key key, this.uname3,this.start = true});
 
   @override
   _DiscoveryPage createState() => new _DiscoveryPage();
@@ -107,11 +116,11 @@ class _DiscoveryPage extends State<DiscoveryPage> {
     }
   }
 
-  void downloadcsvfile() async {
+  void downloadcsvfile(name,date) async {
     String path = await ExtStorage.getExternalStoragePublicDirectory(
-        ExtStorage.DIRECTORY_DOWNLOADS);
+        ExtStorage.DIRECTORY_DOCUMENTS);
     //String fullPath = tempDir.path + "/boo2.pdf'";
-    String fullPath = "$path/junaid2_22-04-21.csv";
+    String fullPath = path+"/"+name+"_"+date+".csv";
     // print('full path ${fullPath}');
     download2(dio, imgUrl, fullPath);
   }
@@ -169,7 +178,11 @@ class _DiscoveryPage extends State<DiscoveryPage> {
 
   @override
   Widget build(BuildContext context) {
-    downloadcsvfile();
+    var now = new DateTime.now();
+    var formatter = new DateFormat('dd-MM-yyyy');
+    String formattedDate = formatter.format(now);
+    downloadcsvfile(widget.uname3,formattedDate);
+
     return Scaffold(
       appBar: AppBar(
         flexibleSpace: Container(

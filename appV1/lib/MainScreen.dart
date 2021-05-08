@@ -22,6 +22,7 @@ import 'package:csv/csv.dart';
 import 'dart:convert';
 import 'MainPage.dart';
 import 'main_page.dart';
+import 'DiscoveryPage.dart';
 
 final imgUrl =
     "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/csv/dummy.csv";
@@ -33,6 +34,12 @@ class Username{
 
   Username(this.uname);
 }
+class Username2 {
+  final String uname3;
+
+  Username2(this.uname3);
+}
+
 
 // void main() {
 //
@@ -589,11 +596,10 @@ class _MyAppState extends State<MyApp>{
                           MaterialStateProperty.all<Color>(Colors.green),
                     ),
                     onPressed: () {
-                      debugPrint(widget.uname2);
-                      var now = new DateTime.now();
-                      var formatter = new DateFormat('dd-MM-yyyy');
-                      String formattedDate = formatter.format(now);
-                      debugPrint(formattedDate);
+                      Navigator.push(context,
+                          new MaterialPageRoute(builder: (context) {
+                            return new DiscoveryPage(uname3:widget.uname2);
+                          }));
                     },
                   ),
                 ),

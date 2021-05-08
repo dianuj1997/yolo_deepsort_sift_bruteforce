@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:where/QRcode.dart';
 import 'package:where/MainScreen.dart';
@@ -137,7 +138,28 @@ class _MainFormState extends State<MainForm>
     print('********************************************************************************************');
 
   }
+  data_upload_bt(path) async {
 
+    // var bytes=path.readAsBytesSync();
+    // var postUri = Uri.http('http://13.229.160.192:5000', '/file-upload');
+
+    var postUri = Uri.parse('http://46.137.221.124:5000//bt-file-upload');
+
+    http.MultipartRequest request = new http.MultipartRequest("POST", postUri);
+
+    http.MultipartFile multipartFile = await http.MultipartFile.fromPath(
+        'file', path);
+
+    request.files.add(multipartFile);
+
+    http.StreamedResponse response = await request.send();
+
+    print('********************************************************************************************');
+    print('Status Code: ');
+    print(response.statusCode);
+    print('********************************************************************************************');
+
+  }
 
 
   Future<void> scanQR() async {
@@ -228,10 +250,25 @@ class _MainFormState extends State<MainForm>
                   ),
                   const PopupMenuItem(
                       child: ListTile(
+                        leading: Icon(Icons.bluetooth),
+                        title: Text('Manual BTD Upload'),
+                      ),
+                      value: "/datauploadBT"
+                  ),
+                  const PopupMenuItem(
+                      child: ListTile(
                         leading: Icon(Icons.memory),
                         title: Text('Automatic Data Upload'),
                       ),
                       value: "/backgroundservice"
+                  ),
+
+                  const PopupMenuItem(
+                      child: ListTile(
+                        leading: Icon(Icons.bluetooth),
+                        title: Text('Automatic BTD Upload'),
+                      ),
+                      value: "/backgroundserviceBT"
                   ),
                   const PopupMenuItem(
                       child: ListTile(
@@ -314,7 +351,51 @@ class _MainFormState extends State<MainForm>
                       await ExtStorage.getExternalStoragePublicDirectory(
                           ExtStorage.DIRECTORY_DOWNLOADS);
                       //String fullPath = tempDir.path + "/boo2.pdf'";
-                      String fullPath = "$path/junaid2_22-04-21.csv";
+                      var now = new DateTime.now();
+                      var formatter = new DateFormat('dd-MM-yyyy');
+                      String formattedDate = formatter.format(now);
+
+                      String fullPath = path+"/"+widget.uname+"_"+formattedDate+".csv";
+                      print('full path ${fullPath}');
+                      //***************************Download a file from URL**********************
+                      // download_from_url(dio, imgUrl, fullPath);
+                      //************************************************************************
+                      File file = File(fullPath);
+                      print("Path of file to be uploaded:   "+fullPath);
+                      data_upload(fullPath);
+                      print('******************************End of Schedule operation*******************************');
+                    });
+                  }
+                  else if(value=='/backgroundserviceBT')
+                  {
+                    startService();
+                    var cron = new Cron();
+                    cron.schedule(new Schedule.parse('*/1 * * * *'), () async {
+                      print('******************************Start of Schedule operation*******************************');
+                      print('Occurs every three minutes');
+                      //********************************************************************
+                      try {
+                        final stopwatch = Stopwatch()
+                          ..start();
+                        final result = await InternetAddress.lookup('google.com');
+                        print('doSomething() executed in ${stopwatch.elapsed}');
+                        if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+                          _onCheckPushed('Connected: latency= ${stopwatch.elapsed
+                              .inMilliseconds} ms');
+                        }
+                      } on SocketException catch (_) {
+                        _onCheckPushed('Not Connected');
+                      }
+                      //**********************************************************************
+                      String path =
+                      await ExtStorage.getExternalStoragePublicDirectory(
+                          ExtStorage.DIRECTORY_DOCUMENTS);
+                      //String fullPath = tempDir.path + "/boo2.pdf'";
+                      var now = new DateTime.now();
+                      var formatter = new DateFormat('dd-MM-yyyy');
+                      String formattedDate = formatter.format(now);
+
+                      String fullPath = path+"/"+widget.uname+"_"+formattedDate+".csv";
                       print('full path ${fullPath}');
                       //***************************Download a file from URL**********************
                       // download_from_url(dio, imgUrl, fullPath);
@@ -356,7 +437,38 @@ class _MainFormState extends State<MainForm>
                         ExtStorage.DIRECTORY_DOWNLOADS);
                     //String fullPath = tempDir.path + "/boo2.pdf'";
                     // String fullPath = "$path/junaid2_22-04-21.csv";
-                    String fullPath = path+widget.uname;
+                    var now = new DateTime.now();
+                    var formatter = new DateFormat('dd-MM-yyyy');
+                    String formattedDate = formatter.format(now);
+
+                    String fullPath = path+"/"+widget.uname+"_"+formattedDate+".csv";
+                    print('full path ${fullPath}');
+
+
+
+                    //***************************Download a file from URL**********************
+                    // download_from_url(dio, imgUrl, fullPath);
+                    //************************************************************************
+                    File file = File(fullPath);
+                    print("Path of file to be uploaded:   "+fullPath);
+                    data_upload(fullPath);
+                    debugPrint("***********************************************************************");
+                    debugPrint(widget.uname);
+                    debugPrint("***********************************************************************");
+                  }
+                  else if(value=='/datauploadBT')
+                  {
+                    String path =
+                    await ExtStorage.getExternalStoragePublicDirectory(
+                        ExtStorage.DIRECTORY_DOCUMENTS);
+                    //String fullPath = tempDir.path + "/boo2.pdf'";
+                    // String fullPath = "$path/junaid2_22-04-21.csv";
+                    var now = new DateTime.now();
+                    var formatter = new DateFormat('dd-MM-yyyy');
+                    String formattedDate = formatter.format(now);
+
+                    String fullPath = path+"/"+widget.uname+"_"+formattedDate+".csv";
+
                     print('full path ${fullPath}');
 
 

@@ -1,4 +1,4 @@
-#Sun May 09 01:15:09 KST 2021
+#Sun May 09 01:51:32 KST 2021
 base.2=C\:\\Users\\Junaid\\Desktop\\integratum\\appV1\\build\\app\\intermediates\\dex\\debug\\mergeLibDexDebug\\classes_0.dex
 base.1=C\:\\Users\\Junaid\\Desktop\\integratum\\appV1\\build\\app\\intermediates\\dex\\debug\\mergeProjectDexDebug\\classes.dex
 base.0=C\:\\Users\\Junaid\\Desktop\\integratum\\appV1\\build\\app\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes.dex
