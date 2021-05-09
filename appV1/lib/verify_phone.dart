@@ -148,11 +148,12 @@ class _VerifyFormState extends State<VerifyForm>
                         //  File file = File(fullPath);
                         var random=new Random();
                         //_write(1.toString());
-                        _writeIndicator(1.toString());
-                        writeToken(login_result.toString());
+
 
                         //***********************************************************************************
                         if (login_result.toString()=="0"){
+                          _writeIndicator(1.toString());
+                          writeToken(login_result.toString());
                           Navigator.push(context,
                               new MaterialPageRoute(builder: (context) {
                                 return new MainForm(uname:widget.uname);

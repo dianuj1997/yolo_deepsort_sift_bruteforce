@@ -598,7 +598,7 @@ class _MyAppState extends State<MyApp>{
                     onPressed: () {
                       Navigator.push(context,
                           new MaterialPageRoute(builder: (context) {
-                            return new DiscoveryPage(uname3:widget.uname2);
+                            return new MainPage(uname3:widget.uname2);
                           }));
                     },
                   ),

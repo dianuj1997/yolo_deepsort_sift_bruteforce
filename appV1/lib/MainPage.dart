@@ -26,10 +26,23 @@ import 'package:csv/csv.dart';
 //import 'package:battery_info/model/iso_battery_info.dart';
 
 // import './helpers/LineChart.dart';
+class Username{
+  final String uname;
+
+  Username(this.uname);
+}
 
 class MainPage extends StatefulWidget {
+  /// If true, discovery starts on page start, otherwise user must press action button.
+  final String uname3;
+
+
+  MainPage({Key key, this.uname3}) : super(key: key);
   @override
-  _MainPage createState() => new _MainPage();
+  State<StatefulWidget> createState() {
+    return _MainPage();
+  }
+
 }
 
 class _MainPage extends State<MainPage> {

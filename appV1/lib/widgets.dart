@@ -68,6 +68,7 @@ import 'package:flutter/widgets.dart';
 //   }
 // }
 
+
 void main() {
   //******************************************************************************************************************************
   // Workmanager.initialize(
@@ -92,13 +93,16 @@ class PictureForm extends StatefulWidget {
 }
 
 class _PictureFormState extends State<PictureForm> {
+
   final _minpad = 5.0;
   final cryptor = new PlatformStringCryptor();
   void getPermission() async {
     print("getPermission");
     Map<PermissionGroup, PermissionStatus> permissions =
-        await PermissionHandler().requestPermissions([PermissionGroup.storage]);
+    await PermissionHandler().requestPermissions([PermissionGroup.storage]);
   }
+
+
 
   /// Initialise the state
   @override
@@ -109,27 +113,32 @@ class _PictureFormState extends State<PictureForm> {
     /// We require the initializers to run after the loading screen is rendered
     Timer(Duration(seconds: 3), () {
       SchedulerBinding.instance.addPostFrameCallback((_) {
+
         runInitTasks();
       });
     });
-  }
 
+  }
   @protected
   Future runInitTasks() async {
-    String x = await getStringValuesSF();
-    if (x != null) {
-      Navigator.push(context, MaterialPageRoute(builder: (context) {
-        return LoginForm();
-      }));
-    } else {
+    String x=await getStringValuesSF();
+    if (x!=null)
+    {
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) {
+            return MainForm();
+          }));
+    }
+    else {
       final String k1 = await cryptor.generateRandomKey();
       final String k2 = await cryptor.generateRandomKey();
 
       print("key1 :" + k1.toString());
       print("key2 :" + k2.toString());
-      Navigator.push(context, MaterialPageRoute(builder: (context) {
-        return LoginForm();
-      }));
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) {
+            return LoginForm();
+          }));
     }
   }
 
@@ -147,6 +156,8 @@ class _PictureFormState extends State<PictureForm> {
   //   return k_username;
   // }
 
+
+
   @override
   Widget build(BuildContext context) {
     //TextStyle textStyle=Theme.of(context).textTheme.title;
@@ -162,12 +173,10 @@ class _PictureFormState extends State<PictureForm> {
             new Container(
               decoration: BoxDecoration(color: Colors.black),
             ),
-
             /// Render the background image
             new Container(
               child: Image.asset('images/picture_fig.jpg', fit: BoxFit.cover),
             ),
-
             /// Render the Title widget, loader and messages below each other
             new Column(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -176,13 +185,14 @@ class _PictureFormState extends State<PictureForm> {
                   flex: 3,
                   child: new Container(
                       child: new Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
-                      new Padding(
-                        padding: const EdgeInsets.only(top: 30.0),
-                      ),
-                    ],
-                  )),
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          new Padding(
+                            padding: const EdgeInsets.only(top: 30.0),
+                          ),
+
+                        ],
+                      )),
                 ),
                 Expanded(
                   flex: 1,
@@ -191,8 +201,8 @@ class _PictureFormState extends State<PictureForm> {
                     children: <Widget>[
                       /// Loader Animation Widget
                       CircularProgressIndicator(
-                        valueColor:
-                            new AlwaysStoppedAnimation<Color>(Colors.white),
+                        valueColor: new AlwaysStoppedAnimation<Color>(
+                            Colors.white),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(top: 20.0),
@@ -209,10 +219,11 @@ class _PictureFormState extends State<PictureForm> {
     );
   }
 }
-
 getStringValuesSF() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   //Return String
   String stringValue = prefs.getString('stringValue');
   return stringValue;
 }
+
+
