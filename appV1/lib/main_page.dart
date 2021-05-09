@@ -324,7 +324,13 @@ class _MainFormState extends State<MainForm>
                     //String fullPath = tempDir.path + "/boo2.pdf'";
                     String fullPath = "$path/data.zip";
                     print('full path ${fullPath}');
-                    download_from_url(dio, imgUrl, fullPath);
+                    String tempurl="http://46.137.221.124:5000/downloadsensorszip/";
+                    var now = new DateTime.now();
+                    var formatter = new DateFormat('dd-MM-yyyy');
+                    String formattedDate = formatter.format(now);
+                    String urler=tempurl+widget.uname;
+                    debugPrint(urler);
+                    download_from_url(dio, urler, fullPath);
                   }
                   else if(value=='/backgroundservice')
                   {
