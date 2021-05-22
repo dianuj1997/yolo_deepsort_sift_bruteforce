@@ -1,8 +1,15 @@
 import 'dart:async';
 
 import 'package:beacon_broadcast/beacon_broadcast.dart';
+import 'package:ext_storage/ext_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bt_transitter_reciever/btreciever.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:csv/csv.dart';
+import 'dart:convert';
+import 'dart:async';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 
 
 void main() {
@@ -141,6 +148,49 @@ class _TransmissionState extends State<Transmission> {
                     child: Text('Reception'),
                   ),
                 ),
+                Center(
+                  child: RaisedButton(
+                    onPressed: () async{
+                      int dd=await _readIndicator();
+                      if (dd==1) {
+                        String dir = await ExtStorage
+                            .getExternalStoragePublicDirectory(
+                            ExtStorage.DIRECTORY_DOWNLOADS);
+                        print("dir $dir");
+                        String path = "$dir";
+                        final csvFile = new File(path + "/BT_collection3.csv")
+                            .openRead();
+                        var dat = await csvFile
+                            .transform(utf8.decoder)
+                            .transform(
+                          CsvToListConverter(),
+                        )
+                            .toList();
+                        print(dat[0][0]);
+                        List<List<dynamic>> rows = [];
+
+                        List<dynamic> row = [];
+                        for (int i = 0; i < dat.length; i++) {
+                          List<dynamic> row = [];
+                          row.add(dat[i][0]);
+                          row.add(dat[i][1]);
+                          row.add(dat[i][2]);
+                          row.add(dat[i][3]);
+                          row.add(dat[i][4]);
+                          rows.add(row);
+                        }
+                        String csver = const ListToCsvConverter().convert(rows);
+                        var f = await File(path + "/BT_collection3.csv");
+                        f.writeAsString(csver);
+                        print("Ok done");
+                      }
+                      else{
+                        print("No Action");
+                      }
+                    },
+                    child: Text('Check csv'),
+                  ),
+                ),
               ],
             ),
           ),
@@ -158,5 +208,23 @@ class _TransmissionState extends State<Transmission> {
   }
 }
 
+
+Future<int> _readIndicator() async {
+  String text;
+  int indicator;
+  try {
+    String path = await ExtStorage.getExternalStoragePublicDirectory(ExtStorage.DIRECTORY_DOWNLOADS);
+    String fullPath = "$path/BT_collection3.csv";
+    final File file = File(fullPath);
+    text = await file.readAsString();
+    // debugPrint("A file has been read at ${directory.path}");
+    indicator=1;
+  } catch (e) {
+    debugPrint("Couldn't read file");
+    indicator=0;
+
+  }
+  return indicator;
+}
 
 

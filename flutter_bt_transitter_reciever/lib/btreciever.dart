@@ -80,6 +80,7 @@ class Reception extends StatefulWidget {
 class _ReceptionState extends State<Reception> {
   String _beaconResult = 'Not Scanned Yet.';
   int _nrMessaggesReceived = 0;
+  int _availablecheck=0;
   var isRunning = false;
 
   final StreamController<String> beaconEventsController =
@@ -121,11 +122,16 @@ class _ReceptionState extends State<Reception> {
         ExtStorage.DIRECTORY_DOWNLOADS);
     print("dir $dir");
     String file = "$dir";
-    var f = await File(file + "/BT_collection.csv");
+
+
+      var f = await File(file + "/BT_collection5.csv");
+
+
+
     //***************************************************************************
 
     beaconEventsController.stream.listen(
-            (data) {
+            (data) async{
           if (data.isNotEmpty) {
             setState(() {
               _beaconResult = data;
@@ -139,18 +145,66 @@ class _ReceptionState extends State<Reception> {
             var scantime= parseddata['scanTime'];
             var rssi = parseddata['rssi'];
 
-            List<List<dynamic>> rows = [];
+            int dd=await _readIndicator();
+            if (dd==1)
+              {
+                print("**********************************************************");
+                print("There is file!");
+                print("**********************************************************");
+                final csvFile = new File(file + "/BT_collection5.csv")
+                    .openRead();
+                var dat = await csvFile
+                    .transform(utf8.decoder)
+                    .transform(
+                  CsvToListConverter(),
+                )
+                    .toList();
 
-            List<dynamic> row = [];
-            row.add(uuid);
-            row.add(distance);
-            row.add(proximity);
-            row.add(scantime);
-            row.add(rssi);
+                List<List<dynamic>> rows = [];
 
-            rows.add(row);
-            String csv = const ListToCsvConverter().convert(rows);
-            f.writeAsString(csv);
+                List<dynamic> row = [];
+                for (int i = 0; i < dat.length; i++) {
+                  List<dynamic> row = [];
+                  row.add(dat[i][0]);
+                  row.add(dat[i][1]);
+                  row.add(dat[i][2]);
+                  row.add(dat[i][3]);
+                  row.add(dat[i][4]);
+                  rows.add(row);
+                }
+                for (int i = 0; i < dat.length; i++) {
+                  List<dynamic> row = [];
+                  row.add(dat[i][0]);
+                  row.add(dat[i][1]);
+                  row.add(dat[i][2]);
+                  row.add(dat[i][3]);
+                  row.add(dat[i][4]);
+                  rows.add(row);
+                }
+                row.add(uuid);
+                row.add(distance);
+                row.add(proximity);
+                row.add(scantime);
+                row.add(rssi);
+
+                rows.add(row);
+                String csver = const ListToCsvConverter().convert(rows);
+                f.writeAsString(csver);
+              }
+            else {
+              List<List<dynamic>> rows = [];
+
+              List<dynamic> row = [];
+              row.add(uuid);
+              row.add(distance);
+              row.add(proximity);
+              row.add(scantime);
+              row.add(rssi);
+
+              rows.add(row);
+              String csv = const ListToCsvConverter().convert(rows);
+              f.writeAsString(csv);
+            }
 
             print("Beacons DataReceived: " + data);
           }
@@ -210,8 +264,11 @@ class _ReceptionState extends State<Reception> {
                   }
                   else
                   {
+
                     initPlatformState();
+
                     await BeaconsPlugin.startMonitoring();
+
                   }
                   setState(() {
                     isRunning = !isRunning;
@@ -228,3 +285,21 @@ class _ReceptionState extends State<Reception> {
       ),
     );
   }}
+Future<int> _readIndicator() async {
+  String text;
+  int indicator;
+  try {
+    String path = await ExtStorage.getExternalStoragePublicDirectory(ExtStorage.DIRECTORY_DOWNLOADS);
+    String fullPath = "$path/BT_collection5.csv";
+    final File file = File(fullPath);
+    text = await file.readAsString();
+    // debugPrint("A file has been read at ${directory.path}");
+    indicator=1;
+  } catch (e) {
+    debugPrint("Couldn't read file");
+    indicator=0;
+
+  }
+  return indicator;
+}
+
