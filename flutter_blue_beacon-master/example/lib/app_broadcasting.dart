@@ -28,10 +28,10 @@ onPressed(String superb) async {
 final clearFocus = FocusNode();
 bool broadcasting = false;
 
-String _varuuid='123';
+//String _varuuid='123';
 var rng = new Random();
 final regexUUID = RegExp(r'[0-90-90-0]{8}');
-final uuidController = TextEditingController(text: '${_varuuid}');
+//final uuidController = TextEditingController(text: '${_varuuid}');
 final majorController = TextEditingController(text: '0');
 final minorController = TextEditingController(text: '0');
 

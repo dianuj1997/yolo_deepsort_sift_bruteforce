@@ -260,7 +260,7 @@ class _FlutterBlueAppState extends State<FlutterBlueApp> {
   Widget build(BuildContext context) {
 
     onPressed('${_varuuid}');
-    // _startScan();
+    //_startScan();
     var tiles = new List<Widget>();
     if (state != BluetoothState.on) {
       tiles.add(_buildAlertTile());
@@ -282,11 +282,13 @@ class _FlutterBlueAppState extends State<FlutterBlueApp> {
                 print('Occurs every one minute');
                 String indian_bit=await _generator();
                 print("India:******************");
-                print(indian_bit);
-                onPressed('1');
+
+                onPressed(indian_bit);
                 _startScan();
                 setState(() {
                   _varuuid=indian_bit;
+                  print(indian_bit);
+                  print(_varuuid);
                 });
                 print('******************************End of Schedule operation*******************************');
               });

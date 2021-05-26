@@ -89,7 +89,16 @@ class IBeaconCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final a = iBeacon.uuid;
     final b = iBeacon.distance;
-    downloadcsvfile(a, b);
+    print("********************************************************");
+    print("Let me know the UUID:");
+    print(a);
+    csvgenerator(a.toString(),b.toString());
+
+   print("***************************************************************");
+    // downloadcsvfile(a, b);
+    //********************************************************************************
+
+    //********************************************************************************
     //print(a);
     return Card(
       child: Column(
@@ -150,3 +159,84 @@ class EddystoneEIDCard extends StatelessWidget {
     );
   }
 }
+Future<int> _readIndicator() async {
+  String text;
+  int indicator;
+  try {
+    String path = await ExtStorage.getExternalStoragePublicDirectory(ExtStorage.DIRECTORY_DOWNLOADS);
+    String fullPath = "$path/BT_collection7.csv";
+    final File file = File(fullPath);
+    text = await file.readAsString();
+    // debugPrint("A file has been read at ${directory.path}");
+    indicator=1;
+  } catch (e) {
+    debugPrint("Couldn't read file");
+    indicator=0;
+
+  }
+  return indicator;
+}
+void csvgenerator(String uuid, String distance) async{
+  String dir = await ExtStorage.getExternalStoragePublicDirectory(
+      ExtStorage.DIRECTORY_DOWNLOADS);
+  print("dir $dir");
+  String file = "$dir";
+
+
+  var f = await File(file + "/BT_collection7.csv");
+  int dd=await _readIndicator();
+  if (dd==1)
+  {
+    print("**********************************************************");
+    print("There is file!");
+    print("**********************************************************");
+    final csvFile = new File(file + "/BT_collection7.csv")
+        .openRead();
+    var dat = await csvFile
+        .transform(utf8.decoder)
+        .transform(
+      CsvToListConverter(),
+    )
+        .toList();
+
+    List<List<dynamic>> rows = [];
+
+    List<dynamic> row = [];
+    for (int i = 0; i < dat.length; i++) {
+      List<dynamic> row = [];
+      row.add(dat[i][0]);
+      row.add(dat[i][1]);
+      rows.add(row);
+    }
+    // for (int i = 0; i < dat.length; i++) {
+    //   List<dynamic> row = [];
+    //   row.add(dat[i][0]);
+    //   row.add(dat[i][1]);
+    //   row.add(dat[i][2]);
+    //   row.add(dat[i][3]);
+    //   row.add(dat[i][4]);
+    //   rows.add(row);
+    // }
+    row.add(uuid);
+    row.add(distance);
+
+    rows.add(row);
+
+
+    String csver = const ListToCsvConverter().convert(rows);
+    f.writeAsString(csver);
+  }
+  else {
+    List<List<dynamic>> rows = [];
+
+    List<dynamic> row = [];
+    row.add(uuid);
+    row.add(distance);
+
+    rows.add(row);
+    String csv = const ListToCsvConverter().convert(rows);
+    f.writeAsString(csv);
+  }
+}
+
+
