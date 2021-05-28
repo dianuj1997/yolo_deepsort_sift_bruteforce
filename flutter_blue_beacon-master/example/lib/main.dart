@@ -3,7 +3,10 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math';
+
 import 'package:cron/cron.dart';
+import 'package:flutter_restart/flutter_restart.dart';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
@@ -38,6 +41,7 @@ Future<String> _generator() async {
   var uuid = Uuid();
   String varuuid;
 
+
   int _x=2;
 
   uuid.v1(options: {
@@ -58,9 +62,6 @@ Future<String> _generator() async {
   //   _varuuid=result_hex.toString();
   // });
   // Create PBKDF2 instance using the SHA256 hash. The default is to use SHA1     // data being hashed
-
-
-
 
 
   // Password we want to hash
@@ -117,7 +118,11 @@ class FlutterBlueApp extends StatefulWidget {
 }
 
 class _FlutterBlueAppState extends State<FlutterBlueApp> {
-  String _varuuid;
+  String _varuuid='1';
+  int _vary=1;
+  int _y=1;
+  var rng = new Random();
+
   //******************************************* */
   void getPermission() async {
     //  print("getPermission");
@@ -169,7 +174,7 @@ class _FlutterBlueAppState extends State<FlutterBlueApp> {
           'manufacturerData: ${beacon.scanResult.advertisementData.manufacturerData}');
       print('serviceData: ${beacon.scanResult.advertisementData.serviceData}');
       print(beacon.id);
-      print("Abdulwasay");
+      print("Scanning is happening!!");
       print(beacon.scanResult.device);
       setState(() {
         beacons[beacon.hash] = beacon;
@@ -242,6 +247,7 @@ class _FlutterBlueAppState extends State<FlutterBlueApp> {
         state = s;
       });
     });
+
   }
   Future<void> startService()
   async {
@@ -258,8 +264,13 @@ class _FlutterBlueAppState extends State<FlutterBlueApp> {
 
   @override
   Widget build(BuildContext context) {
+    setState(() {
+      var rng = new Random();
+      _vary=rng.nextInt(9);
 
-    onPressed('${_varuuid}');
+    });
+    onPressed('${_vary}');
+
     //_startScan();
     var tiles = new List<Widget>();
     if (state != BluetoothState.on) {
@@ -275,23 +286,39 @@ class _FlutterBlueAppState extends State<FlutterBlueApp> {
           title: const Text('CCR-LAB PLUS'),
           actions: <Widget>[
             IconButton(icon: Icon(Icons.clear), onPressed: () async{
-              startService();
-              var cron = new Cron();
-              cron.schedule(new Schedule.parse('*/1 * * * *'), () async {
-                print('******************************Start of Schedule operation*******************************');
-                print('Occurs every one minute');
-                String indian_bit=await _generator();
-                print("India:******************");
-
-                onPressed(indian_bit);
-                _startScan();
-                setState(() {
-                  _varuuid=indian_bit;
-                  print(indian_bit);
-                  print(_varuuid);
-                });
-                print('******************************End of Schedule operation*******************************');
-              });
+              // startService();
+              // var cron = new Cron();
+              // cron.schedule(new Schedule.parse('*/1 * * * *'), () async {
+                final result = await FlutterRestart.restartApp();
+                print("Restarted.......");
+                print(result);
+                // _startScan();
+              // setState(() async {
+              // String indian_bit=await _generator();
+              // _varuuid=indian_bit;
+              // print("Stuff generated and to be sent.....");
+              // print(_varuuid);
+              // });
+    // });
+              // startService();
+              // var cron = new Cron();
+              // cron.schedule(new Schedule.parse('*/1 * * * *'), () async {
+              //   print('******************************Start of Schedule operation*******************************');
+              //   print('Occurs every one minute');
+              //   String indian_bit=await _generator();
+              //   print("India:******************");
+              //   _startScan();
+              //   setState(() {
+              //     _varuuid=indian_bit;
+              //     print(indian_bit);
+              //     print(_varuuid);
+              //     _y=rng.nextInt(9);
+              //     print("Stuff to be sending.......................");
+              //     print(_y);
+              //     // onPressed('${_y}');
+              //   });
+              //   print('******************************End of Schedule operation*******************************');
+              // });
             })
           ],
         ),
@@ -307,4 +334,7 @@ class _FlutterBlueAppState extends State<FlutterBlueApp> {
       ),
     );
   }
+}
+void _restartApp() async {
+  FlutterRestart.restartApp();
 }

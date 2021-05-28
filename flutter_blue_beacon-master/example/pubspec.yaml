@@ -33,6 +33,7 @@ dependencies:
   dio: any
   permission_handler: ^4.4.0
   ext_storage: any
+  flutter_restart: ^0.0.3
   csv: any
   path: 
   synchronized: ^3.0.0

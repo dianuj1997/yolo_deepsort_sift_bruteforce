@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
-
 import 'package:flutter_beacon/flutter_beacon.dart';
 import 'dart:convert';
 import 'package:uuid/uuid.dart';
@@ -15,9 +14,11 @@ onPressed(String superb) async {
   if (broadcasting) {
     await flutterBeacon.stopBroadcast();
   } else {
+    print(".............This the key being sent");
+    print(superb);
     //*******************************************************************************
     await flutterBeacon.startBroadcast(BeaconBroadcast(
-      proximityUUID: '${superb}',
+      proximityUUID: '$superb',
       major: int.tryParse(majorController.text) ?? 0,
       minor: int.tryParse(minorController.text) ?? 0,
     ));
