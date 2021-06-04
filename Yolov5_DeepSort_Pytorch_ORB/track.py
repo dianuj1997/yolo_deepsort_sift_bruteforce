@@ -22,6 +22,8 @@ import matplotlib.image as mpimg
 
 
 
+
+
 import numpy as np
 
 
@@ -233,48 +235,53 @@ def detect(opt):
                     lis_idx.append(Dict_label_feature)
                     current_dict=lis_idx[len(lis_idx)-1]
 
-                    for it in range(len(lis_idx)-1):
-                        if (it>20):
-                            it=it-5
-                        pre_dict=lis_idx[it]
-                        for keyter in current_dict.keys():
-                            img=current_dict[keyter]
-                            for pre_keyter in pre_dict.keys():
-                                img_pre=pre_dict[pre_keyter]
-                                # Initiate ORB detector
-                                orb = cv2.ORB_create()
-                                # find the keypoints and descriptors with ORB
-                                kp1, des1 = orb.detectAndCompute(img,None)
-                                kp2, des2 = orb.detectAndCompute(img_pre,None)
-                                bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
-                                matches = bf.match(des1, des2)
-                                matches = sorted(matches, key = lambda x:x.distance)
-                                print("Nuber of matches:")
-                                print(len(matches))
-                                if (len(matches)>70):
+                    if identities.shape[0]>1:
+
+                        for it in range(len(lis_idx)-1):
+                            if (it>20):
+                                it=it-5
+                            pre_dict=lis_idx[it]
+                            
+                            for keyter in current_dict.keys():
+                                img=current_dict[keyter]
+                                reccy=[]
+                                reccy_prekeyter=[]
+                                if len(pre_dict.keys())==len(current_dict.keys()):
+                                    for pre_keyter in pre_dict.keys():
+                                        img_pre=pre_dict[pre_keyter]
+                                        # Initiate SIFT detector
+                                        sift = cv2.SIFT_create()
+                                        # find the keypoints and descriptors with SIFT
+                                        kp1, des1 = sift.detectAndCompute(img,None)
+                                        kp2, des2 = sift.detectAndCompute(img_pre,None)
+                                        # BFMatcher with default params
+                                        bf = cv2.BFMatcher()
+                                        matches = bf.knnMatch(des1,des2,k=2)
+                                        # Apply ratio test
+                                        good = []
+                                        for m,n in matches:
+                                            if m.distance < 0.75*n.distance:
+                                                good.append([m])
+                                            
+                                        reccy.append(len(good))
+                                        reccy_prekeyter.append(pre_keyter)
+
+                                    xx=reccy.index(max(reccy))
+                                    n_pre_keyter=reccy_prekeyter[xx]
+
                                     cur_dic = current_dict.copy()
-                                    cur_dic[pre_keyter] = cur_dic.pop(keyter)
+                                    cur_dic[n_pre_keyter] = cur_dic.pop(keyter)
                                     lis_idx[len(lis_idx)-1]=cur_dic
 
-                    n_cur_dic=lis_idx[len(lis_idx)-1]
-                    pleasekeys=[]               
-                    for neededkeys in n_cur_dic.keys():
-                        pleasekeys.append(neededkeys)
-                        
-                    for ie in range(identities.shape[0]):
-                        identities[ie]=pleasekeys[ie]
-                   
-                                
+                        n_cur_dic=lis_idx[len(lis_idx)-1]
+                        pleasekeys=[]               
+                        for neededkeys in n_cur_dic.keys():
+                            pleasekeys.append(neededkeys)
                             
-                      
-                            
-                                  
-                                
-                        
+                        for ie in range(identities.shape[0]):
+                            identities[ie]=pleasekeys[ie]
                    
-
-                        
-                        
+ 
                     
                     # Box coordinates
                     print(bbox_xyxy)
