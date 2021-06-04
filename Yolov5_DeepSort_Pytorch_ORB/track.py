@@ -17,7 +17,12 @@ from pathlib import Path
 import cv2
 import torch
 import torch.backends.cudnn as cudnn
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
 
+
+
+import numpy as np
 
 
 palette = (2 ** 11 - 1, 2 ** 15 - 1, 2 ** 20 - 1)
@@ -62,6 +67,7 @@ def draw_boxes(img, bbox, identities=None, offset=(0, 0)):
         cv2.putText(img, label, (x1, y1 +
                                  t_size[1] + 4), cv2.FONT_HERSHEY_PLAIN, 2, [255, 255, 255], 2)
     return img
+
 
 
 def detect(opt):
@@ -122,6 +128,14 @@ def detect(opt):
     master_match=[]
 
     master_lab_2=[]
+
+
+    index_doc = [ [] for _ in range(2)]
+    image_doc=[ [] for _ in range(2)]
+    IDF=[]
+
+    lis_idx=[]
+    
     
     for frame_idx, (path, img, im0s, vid_cap) in enumerate(dataset):
         master_lab.append(0)
@@ -140,6 +154,7 @@ def detect(opt):
         master_img.append(img_indian[0,0,:,:])
         X=master_img[0]
         print(X.shape)
+        
          
         # Inference
         t1 = time_synchronized()
@@ -189,45 +204,75 @@ def detect(opt):
 
                 print("Frame IDX:")
                 print(frame_idx)
-                keta=1
+                keta=10
+                Dict_label_feature = {}
+                
         
                 # draw boxes for visualization
                 if len(outputs) > 0:
-                   
                     bbox_xyxy = outputs[:, :4]
                     identities = outputs[:, -1]
-                    if len(identities>1):
-                        master_lab_2.append(identities)
-                
-                    if (frame_idx<=keta):
-                        master_lab[frame_idx]=identities
-                        
-                    elif (frame_idx>keta):
-                        #cv2.imshow('',master_img[frame_idx])
-                        #print(master_img[frame_idx].shape)
-                        temp_im_1=cv2.normalize(master_img[frame_idx], None, 0, 255, cv2.NORM_MINMAX).astype('uint8')
-                        temp_im_2=cv2.normalize(master_img[frame_idx-keta], None, 0, 255, cv2.NORM_MINMAX).astype('uint8')
-                        # Initiate ORB detector
-                        orb = cv2.ORB_create()
-                        # find the keypoints and descriptors with ORB
-                        kp1, des1 = orb.detectAndCompute(temp_im_1,None)
-                        kp2, des2 = orb.detectAndCompute(temp_im_2,None)
-                        bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
-                        matches = bf.match(des1, des2)
-                        matches = sorted(matches, key = lambda x:x.distance)
-                        print("Nuber of matches:")
-                        print(len(matches))
-                        master_match[frame_idx]=len(matches)
-                        print("identity:")
-                        print(identities)
+
+                    
+
+                    print(identities.shape)
+                    
+                    for mun in range(identities.shape[0]):
+                        x1=bbox_xyxy[mun,0]
+                        y1=bbox_xyxy[mun,1]
+                        x2=bbox_xyxy[mun,2]
+                        y2=bbox_xyxy[mun,3]
+                        imag=cv2.normalize(master_img[frame_idx], None, 0, 255, cv2.NORM_MINMAX).astype('uint8')
+                        crop_imag = imag[x1:x2, y1:y2]
 
                         
-                        if (abs(len(matches)-master_match[frame_idx-keta])<100 and abs(len(matches)-master_match[frame_idx-keta])>0 and len(master_lab_2)>=50):
+                        #cv2.imshow('',crop_imag)
+                        
+                        Dict_label_feature[identities[mun]]=crop_imag
+
+                    lis_idx.append(Dict_label_feature)
+                    current_dict=lis_idx[len(lis_idx)-1]
+
+                    for it in range(len(lis_idx)-1):
+                        if (it>20):
+                            it=it-5
+                        pre_dict=lis_idx[it]
+                        for keyter in current_dict.keys():
+                            img=current_dict[keyter]
+                            for pre_keyter in pre_dict.keys():
+                                img_pre=pre_dict[pre_keyter]
+                                # Initiate ORB detector
+                                orb = cv2.ORB_create()
+                                # find the keypoints and descriptors with ORB
+                                kp1, des1 = orb.detectAndCompute(img,None)
+                                kp2, des2 = orb.detectAndCompute(img_pre,None)
+                                bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+                                matches = bf.match(des1, des2)
+                                matches = sorted(matches, key = lambda x:x.distance)
+                                print("Nuber of matches:")
+                                print(len(matches))
+                                if (len(matches)>70):
+                                    cur_dic = current_dict.copy()
+                                    cur_dic[pre_keyter] = cur_dic.pop(keyter)
+                                    lis_idx[len(lis_idx)-1]=cur_dic
+
+                    n_cur_dic=lis_idx[len(lis_idx)-1]
+                    pleasekeys=[]               
+                    for neededkeys in n_cur_dic.keys():
+                        pleasekeys.append(neededkeys)
+                        
+                    for ie in range(identities.shape[0]):
+                        identities[ie]=pleasekeys[ie]
+                   
+                                
                             
-                            identities=master_lab_2[len(master_lab_2)-keta]
-                            master_lab[frame_idx]=identities
-                        else:
-                            master_lab[frame_idx]=identities
+                      
+                            
+                                  
+                                
+                        
+                   
+
                         
                         
                     
